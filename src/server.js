@@ -1,98 +1,85 @@
-// Import Express
+// Load required modules
 const express = require('express');
 const path = require('path');
 
-// Create an Express application
+// Initialize the Express app
 const app = express();
 
-// Set the port (you can use any port, 3000 is common for development)
+// Configure server port (default to 8100 if PORT isn't set)
 const PORT = process.env.PORT || 8100;
 
-// Set the view engine to ejs
+// Configure EJS as the templating engine
 app.set('view engine', 'ejs');
 
-// Set the directory where the view templates will be stored
+// Specify the folder for EJS templates
 app.set('views', path.join(__dirname, 'views'));
 
-// Serve static files from the 'public' directory
+// Serve static assets from the 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-
-
-// Define routes
-// Home route using an EJS template
+// Routes Definition
+// Root route to display the home page with SpaceX launches
 app.get('/', async (req, res) => {
-    // Render 'index' template from the 'views' directory
-
-    // Fetch the latest SpaceX launches
+    // Retrieve latest SpaceX launches
     const launches = await fetchSpaceXLaunches();
 
-    res.render('index', { title: 'Welcome to the SpaceX Launches Information Portal', message: 'This is a simple web application that uses the SpaceX API to display information about the latest launches.',
-    launches: launches,
-    launchDetails: null,
-    crewDetails: [],
-    showBackButton: false });
+    res.render('index', {
+        title: 'Welcome to the SpaceX Launches Information Portal',
+        message: 'This is a simple web application that uses the SpaceX API to display information about the latest launches.',
+        launches: launches,
+        launchDetails: null,
+        crewDetails: [],
+        showBackButton: false
+    });
 });
 
-// Route to fetch and display details of a specific launch
+// Route to display detailed information about a specific launch
 app.get('/launch/:id', async (req, res) => {
     const launchId = req.params.id;
 
     try {
         const launches = await fetchSpaceXLaunches();
-
         console.log(`Fetching details for launch ${launchId}`);
         const response = await fetch(`https://api.spacexdata.com/v5/launches/${launchId}`);
         const launchDetails = await response.json();
 
-        // Check if there are crew members for this launch
+        // Fetch details for crew members if available
         const crewIds = launchDetails.crew.map(crewMember => crewMember.crew);
-
-        const crewDetailsPromises = crewIds.map(id => 
-            fetch(`https://api.spacexdata.com/v4/crew/${id}`).then(response => response.json())
-        );
-
-        // Wait for all the crew details to be fetched
+        const crewDetailsPromises = crewIds.map(id => fetch(`https://api.spacexdata.com/v4/crew/${id}`).then(res => res.json()));
         const crewDetails = await Promise.all(crewDetailsPromises);
 
         res.render('index', {
             title: `Launch Details: ${launchDetails.name}`,
             message: '',
             launches: launches,
-            launchDetails: launchDetails, // Pass the launch details to the template
+            launchDetails: launchDetails,
             crewDetails: crewDetails,
             showBackButton: true
         });
-        return;
     } catch (error) {
         console.error('Error fetching launch details:', error);
-
         res.render('index', {
-                title: `Launch Details: ${launchDetails.name}`,
-                message: '',
-                launches: launches,
-                launchDetails: launchDetails, // Pass the launch details to the template
-                crewDetails: [],
-                showBackButton: true
+            title: `Launch Details: ${launchDetails.name}`,
+            message: 'Failed to retrieve details for this launch.',
+            launches: launches,
+            launchDetails: null,
+            crewDetails: [],
+            showBackButton: true
         });
     }
 });
 
-
+// Function to retrieve all SpaceX launches
 async function fetchSpaceXLaunches() {
     const response = await fetch('https://api.spacexdata.com/v5/launches');
-    const data = await response.json();
-    return data;
+    return await response.json();
 }
 
-// Function to fetch crew member details by their ID
+// Fetch individual crew member details
 async function fetchCrewDetails(crewIds) {
     const crewDetails = [];
 
     console.log(`Finding CrewID: ${crewIds}`);
-
-    // Wait for all fetch requests to complete
     await Promise.all(crewIds.map(async (id) => {
         const response = await fetch(`https://api.spacexdata.com/v4/crew/${id}`);
         const crewMember = await response.json();
@@ -102,15 +89,12 @@ async function fetchCrewDetails(crewIds) {
     return crewDetails;
 }
 
-
-// Start the Express server only if we are not testing
+// Start the server if not in test mode
 if (process.env.NODE_ENV !== 'test') {
-    /* istanbul ignore next */
     app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
+        console.log(`Server operational on port ${PORT}`);
     });
 }
 
-// At the end of your server.js
-module.exports = { app, fetchSpaceXLaunches}; // Export the app for testing
-
+// Export the application for testing purposes
+module.exports = { app, fetchSpaceXLaunches };

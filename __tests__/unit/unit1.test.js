@@ -1,40 +1,36 @@
-// Assuming you are using Jest for your tests
+// Setup for testing with Jest and supertest
 const request = require('supertest');
 const { fetchSpaceXLaunches } = require('../../src/server');
 
-// Define the mock data for the SpaceX launches
-const mockLaunchDataSuccess = [
+// Mock data for testing SpaceX launches
+const mockSuccessfulLaunches = [
   { id: 1, name: 'Falcon 9' },
-  { id: 2, name: 'Startlink 1' }
+  { id: 2, name: 'Starlink 1' }
 ];
-const mockLaunchDataEmpty = [];
+const mockEmptyLaunches = [];
 
-
-describe('Test fetchSpaceXLaunches', () => {
+describe('SpaceX Launches Fetch Tests', () => {
 
   beforeEach(() => {
-    // Reset fetch mock before each test
+    // Clear fetch mocks before each test
     fetchMock.mockClear();
     fetchMock.mockResponseOnce(JSON.stringify(currentMockData));
-
-//    console.log(currentMockData);
   });
 
   afterEach(() => {
     fetchMock.mockClear();
-    fetchMock.resetMocks(); // Resets all mocks, useful if you're setting up specific mocks in individual tests
+    fetchMock.resetMocks(); // Resetting mocks to ensure clean setup for every test
   });
 
-  let currentMockData = mockLaunchDataSuccess;
-  it('Responds with JSON of all launches', async () => {
-    // Await the function directly
-    const data = await fetchSpaceXLaunches();
-//    console.log(data);
-    expect(data).toBeDefined();
-    expect(data).toBeInstanceOf(Array);
-    if (data.length) {
-      expect(data[0]).toHaveProperty('id');
-      expect(data[0]).toHaveProperty('name');
+  let currentMockData = mockSuccessfulLaunches;
+  it('Should return JSON containing all launches', async () => {
+    // Execute the fetch function and check responses
+    const launches = await fetchSpaceXLaunches();
+    expect(launches).toBeDefined();
+    expect(launches).toBeInstanceOf(Array);
+    if (launches.length > 0) {
+      expect(launches[0]).toHaveProperty('id');
+      expect(launches[0]).toHaveProperty('name');
     }
   });
 });

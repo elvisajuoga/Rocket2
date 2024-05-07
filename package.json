@@ -1,24 +1,24 @@
 {
   "name": "rocket",
   "version": "1.0.0",
-  "description": "A web interface to view SpaceX rocket info",
+  "description":"Interactive portal for accessing SpaceX rocket data",
   "main": "./src/server.js",
   "scripts": {
-    "start": "node ./src/server.js",
-    "dev": "nodemon ./src/server.js",
-    "test": "NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest -all --verbose",
-    "win_test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/.bin/jest",
-    "clearcache": "jest --clearCache"
+    "start": "node ./app/main.js",
+    "develop": "nodemon ./app/main.js",
+    "test": "NODE_ENV=test node --experimental-vm-modules ./node_modules/jest/bin/jest.js --all --verbose",
+    "windows_test": "cross-env NODE_ENV=test node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "clear_test_cache": "jest --clearCache"
   },
-  "author": "Brett Huffman",
-  "license": "ISC",
+  "author": "Elvis Ajuoga",
+  "license": "MIT",
   "dependencies": {
-    "ejs": "^3.1.9",
     "express": "^4.19.1",
-    "node-fetch": "^3.3.2"
+    "ejs": "^3.1.9",
+    "node-fetch": "^3.3.2",
+    "jest": "^29.7.0"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
     "jest-fetch-mock": "^3.0.3",
     "supertest": "^6.3.4"
   },
